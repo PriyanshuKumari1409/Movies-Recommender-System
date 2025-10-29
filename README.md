@@ -33,9 +33,11 @@ It suggests similar movies based on your selection using **Cosine Similarity**.
    cd Movies-Recommender-System
 
 2. Install dependencies:
+   ```bash
    pip install -r requirements.txt
 
-3.Run the app
-  streamlit run app.py
+3.Run the app:
+  ```bash
+streamlit run app.py
 
 4.Select a movie and view recommendations instantly!
