@@ -1,0 +1,14 @@
+
+
+# Ignore large data files in language stats
+*.csv linguist-detectable=false
+*.pkl linguist-detectable=false
+
+# Ensure Jupyter notebooks are counted as Python
+*.ipynb linguist-language=Python
+
+# Treat shell scripts as shell, not data
+*.sh linguist-language=Shell
+
+# Treat procfile as text
+procfile linguist-language=Text
