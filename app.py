@@ -16,7 +16,7 @@ def load_data():
         similarity = pickle.loads(requests.get(SIMILARITY_URL).content)
         return movies_df, similarity
     except Exception as e:
-        st.error(f"❌ Failed to load data from Google Drive: {e}")
+        st.error(f" Failed to load data from Google Drive: {e}")
         return None, None
 
 movies, similarity = load_data()
@@ -42,7 +42,7 @@ def recommend(movie):
     return recommended_movies, posters
 
 # Streamlit UI
-st.title("🎬 Movie Recommender System")
+st.title("Movie Recommender System")
 
 if movies is not None:
     selected_movie = st.selectbox("Select a movie to get recommendations:", movies['title'].values)
@@ -55,4 +55,4 @@ if movies is not None:
                 st.text(names[i])
                 st.image(posters[i])
 else:
-    st.warning("⚠️ Data failed to load. Please check your Google Drive file permissions or links.")
+    st.warning(" Data failed to load. Please check your Google Drive file permissions or links.")
