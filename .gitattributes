@@ -1,7 +1,5 @@
-
-
 # Tell GitHub Linguist to treat Python as the main language
 *.py linguist-detectable=true
-*.pkl linguist-detectable=false
+*.pkl filter=lfs diff=lfs merge=lfs -text
 *.csv linguist-detectable=false
 *.ipynb linguist-detectable=true
