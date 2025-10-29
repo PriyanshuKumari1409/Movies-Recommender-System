@@ -1,14 +1,7 @@
 
 
-# Ignore large data files in language stats
-*.csv linguist-detectable=false
+# Tell GitHub Linguist to treat Python as the main language
+*.py linguist-detectable=true
 *.pkl linguist-detectable=false
-
-# Ensure Jupyter notebooks are counted as Python
-*.ipynb linguist-language=Python
-
-# Treat shell scripts as shell, not data
-*.sh linguist-language=Shell
-
-# Treat procfile as text
-procfile linguist-language=Text
+*.csv linguist-detectable=false
+*.ipynb linguist-detectable=true
