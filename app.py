@@ -1,67 +1,61 @@
-
 import streamlit as st
 import pickle
 import pandas as pd
 import requests
 
-# --- Function to load pickle files from Google Drive ---
+# --- Function to load pickle files directly from Google Drive ---
 def load_pickle_from_drive(url):
-    response = requests.get(url)
-    return pickle.loads(response.content)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raises error if download fails
+        return pickle.loads(response.content)
+    except Exception as e:
+        st.error(f"❌ Failed to load data from: {url}\nError: {e}")
+        return None
 
 # --- Google Drive Direct Download Links ---
-movie_dict_url = "https://drive.google.com/uc?id=1763CSrdwySbVIUn0QnG_FEdOtTq8qZ1V"
-similarity_url = "https://drive.google.com/uc?id=1AZCwZedDeSRWc0y6rBdlEeHnQCtw3HBf"
+movie_dict_url = "https://drive.google.com/uc?export=download&id=1763CSrdwySbVIUn0QnG_FEdOtTq8qZ1V"
+similarity_url = "https://drive.google.com/uc?export=download&id=1AZCwZedDeSRWc0y6rBdlEeHnQCtw3HBf"
 
 # --- Load Data ---
+st.write("⏳ Loading data, please wait...")
+
 movies_dict = load_pickle_from_drive(movie_dict_url)
 similarity = load_pickle_from_drive(similarity_url)
-movies = pd.DataFrame(movies_dict)
 
-# --- Function to fetch movie poster from OMDb API ---
-def fetch_poster(movie_title):
-    api_key = "96875f83"  # replace with your OMDb API key
-    clean_title = movie_title.split('(')[0].strip()
-    url = f"https://www.omdbapi.com/?t={clean_title}&apikey={api_key}"
-    response = requests.get(url)
-    data = response.json()
-    if data.get('Response') == 'True' and data.get('Poster') != "N/A":
-        return data['Poster']
-    else:
-        return "https://via.placeholder.com/300x450.png?text=No+Poster+Found"
+if movies_dict is not None and similarity is not None:
+    movies = pd.DataFrame(movies_dict)
 
-# --- Recommendation Logic ---
+    # --- Debug Info ---
+    st.success("✅ Data Loaded Successfully!")
+    st.write("Movies loaded:", len(movies))
+    st.write("Similarity matrix shape:", similarity.shape)
+else:
+    st.error("⚠️ Data failed to load. Please check your Google Drive file links or make them public.")
+    st.stop()
+
+# --- Movie Recommendation Function ---
 def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]
     distances = similarity[movie_index]
-    movie_list = sorted(
-        list(enumerate(distances)),
-        reverse=True,
-        key=lambda x: x[1]
-    )[1:6]
-
-    recommended_movies = []
-    recommended_posters = []
-    for i in movie_list:
-        movie_title = movies.iloc[i[0]].title
-        poster_url = fetch_poster(movie_title)
-        recommended_movies.append(movie_title)
-        recommended_posters.append(poster_url)
-    return recommended_movies, recommended_posters
+    movie_list = sorted(list(enumerate(distances)), key=lambda x: x[1], reverse=True)[1:6]
+    recommended_movies = [movies.iloc[i[0]]['title'] for i in movie_list]
+    return recommended_movies
 
 # --- Streamlit UI ---
 st.title("🎬 Movie Recommender System")
+st.write("Get top 5 similar movies instantly!")
 
 selected_movie = st.selectbox(
     "Select or search for a movie:",
     movies['title'].values
 )
 
-if st.button("Recommend"):
-    names, posters = recommend(selected_movie)
-    st.subheader("✨ Top 5 Recommended Movies:")
-    cols = st.columns(5)
-    for idx, col in enumerate(cols):
-        with col:
-            st.image(posters[idx], use_container_width=True)
-            st.caption(names[idx])
+if st.button("🔍 Recommend"):
+    try:
+        recommendations = recommend(selected_movie)
+        st.subheader("🎥 Top 5 Recommended Movies:")
+        for i, title in enumerate(recommendations, start=1):
+            st.write(f"{i}. {title}")
+    except Exception as e:
+        st.error(f"❌ An error occurred while generating recommendations: {e}")
